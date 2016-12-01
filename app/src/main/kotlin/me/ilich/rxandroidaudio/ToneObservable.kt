@@ -15,7 +15,7 @@ sealed class ToneObservable<T>(
 
         private const val TwoPi = 2 * Math.PI
 
-        @JvmStatic fun <T> create(frequency: Double, audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize()): ToneObservable<T> {
+        @JvmStatic fun <T> create(frequency: Double, audioOptions: AudioOptions, bufferSize: Int = audioOptions.recordBufferSize()): ToneObservable<T> {
             val result = when (audioOptions.encoding) {
                 AudioFormat.ENCODING_PCM_8BIT -> Tone8bitObservable(frequency, audioOptions, bufferSize)
                 AudioFormat.ENCODING_PCM_16BIT -> Tone16bitObservable(frequency, audioOptions, bufferSize)
@@ -92,7 +92,6 @@ sealed class ToneObservable<T>(
         }
 
         override fun onNext(subscriber: Subscriber<in ShortArray>, data: ShortArray) {
-            Log.v("Sokolov", "tone ${data.size}")
             subscriber.onNext(data)
         }
 

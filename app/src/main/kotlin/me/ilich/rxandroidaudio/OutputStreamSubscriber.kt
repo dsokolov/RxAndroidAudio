@@ -1,22 +1,23 @@
 package me.ilich.rxandroidaudio
 
 import android.media.AudioFormat
-import android.util.Log
 import rx.Subscriber
+import java.io.BufferedOutputStream
 import java.io.DataOutputStream
 import java.io.OutputStream
 
 sealed class OutputStreamSubscriber<T>(
         private val outputStream: OutputStream,
-        audioOptions: AudioOptions
+        val audioOptions: AudioOptions,
+        val bufferSize: Int
 ) : Subscriber<T>() {
 
     companion object {
 
-        @JvmStatic fun <T> create(outputStream: OutputStream, audioOptions: AudioOptions): OutputStreamSubscriber<T> {
+        @JvmStatic fun <T> create(outputStream: OutputStream, audioOptions: AudioOptions, bufferSize: Int = audioOptions.recordBufferSize()): OutputStreamSubscriber<T> {
             val result = when (audioOptions.encoding) {
-                AudioFormat.ENCODING_PCM_8BIT -> OutputStream8bitSubscriber(outputStream, audioOptions)
-                AudioFormat.ENCODING_PCM_16BIT -> OutputStream16bitSubscriber(outputStream, audioOptions)
+                AudioFormat.ENCODING_PCM_8BIT -> OutputStream8bitSubscriber(outputStream, audioOptions, bufferSize)
+                AudioFormat.ENCODING_PCM_16BIT -> OutputStream16bitSubscriber(outputStream, audioOptions, bufferSize)
                 else -> throw IllegalArgumentException("Unknown encoding ${audioOptions.encoding}")
             }
             return result as OutputStreamSubscriber<T>
@@ -24,7 +25,7 @@ sealed class OutputStreamSubscriber<T>(
 
     }
 
-    private val dataOutputStream = DataOutputStream(outputStream)
+    private val dataOutputStream = DataOutputStream(BufferedOutputStream(outputStream, bufferSize))
 
     override fun onStart() {
 
@@ -47,8 +48,8 @@ sealed class OutputStreamSubscriber<T>(
 
     protected abstract fun onWrite(dataOutputStream: DataOutputStream, data: T)
 
-    private class OutputStream8bitSubscriber(outputStream: OutputStream, audioOptions: AudioOptions) :
-            OutputStreamSubscriber<ByteArray>(outputStream, audioOptions) {
+    private class OutputStream8bitSubscriber(outputStream: OutputStream, audioOptions: AudioOptions, bufferSize: Int) :
+            OutputStreamSubscriber<ByteArray>(outputStream, audioOptions, bufferSize) {
 
         override fun onWrite(dataOutputStream: DataOutputStream, data: ByteArray) {
             data.forEach {
@@ -57,11 +58,10 @@ sealed class OutputStreamSubscriber<T>(
         }
     }
 
-    private class OutputStream16bitSubscriber(outputStream: OutputStream, audioOptions: AudioOptions) :
-            OutputStreamSubscriber<ShortArray>(outputStream, audioOptions) {
+    private class OutputStream16bitSubscriber(outputStream: OutputStream, audioOptions: AudioOptions, bufferSize: Int) :
+            OutputStreamSubscriber<ShortArray>(outputStream, audioOptions, bufferSize) {
 
         override fun onWrite(dataOutputStream: DataOutputStream, data: ShortArray) {
-            Log.v("Sokolov", "write ${data.size}")
             data.forEach {
                 dataOutputStream.writeShort(it.toInt())
             }

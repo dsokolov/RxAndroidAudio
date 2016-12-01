@@ -12,6 +12,18 @@
     tools:context="me.ilich.rxandroidaudio.MainActivity">
 
     <Button
+        android:id="@+id/record_start"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="start record" />
+
+    <Button
+        android:id="@+id/record_stop"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="stop record" />
+
+    <Button
         android:id="@+id/playback_start"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

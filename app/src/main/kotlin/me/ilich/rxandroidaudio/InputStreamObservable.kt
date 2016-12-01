@@ -1,8 +1,10 @@
 package me.ilich.rxandroidaudio
 
 import android.media.AudioFormat
+import android.util.Log
 import rx.Observable
 import rx.Subscriber
+import java.io.BufferedInputStream
 import java.io.DataInputStream
 import java.io.EOFException
 import java.io.InputStream
@@ -14,7 +16,7 @@ sealed class InputStreamObservable<T>(
 
     companion object {
 
-        @JvmStatic fun <T> create(inputStream: InputStream, audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize()): InputStreamObservable<T> {
+        @JvmStatic fun <T> create(inputStream: InputStream, audioOptions: AudioOptions, bufferSize: Int = audioOptions.playbackBufferSize()): InputStreamObservable<T> {
             val result = when (audioOptions.encoding) {
                 AudioFormat.ENCODING_PCM_8BIT -> InputStream8bitObservable(inputStream, bufferSize)
                 AudioFormat.ENCODING_PCM_16BIT -> InputStream16bitObservable(inputStream, bufferSize)
@@ -27,10 +29,11 @@ sealed class InputStreamObservable<T>(
 
     override fun call(subscriber: Subscriber<in T>) {
         try {
-            val dataInputStream = DataInputStream(inputStream)
+            val dataInputStream = DataInputStream(BufferedInputStream(inputStream, bufferSize))
             val buffer = onCreateBuffer()
-            while (true) {
+            while (!subscriber.isUnsubscribed) {
                 val readed = onRead(buffer, dataInputStream, subscriber)
+                Log.v("Sokolov", "readed $readed")
                 if (readed == -1) {
                     break
                 }
@@ -68,9 +71,7 @@ sealed class InputStreamObservable<T>(
                 val array = if (readed == bufferSize - 1) {
                     buffer
                 } else {
-                    val a = ByteArray(readed + 1)
-                    a.forEachIndexed { i, byte -> a[i] = buffer[i] }
-                    a
+                    buffer.copyOfRange(0, readed + 1)
                 }
                 subscriber.onNext(array)
             }
@@ -98,9 +99,7 @@ sealed class InputStreamObservable<T>(
                 val array = if (readed == bufferSize - 1) {
                     buffer
                 } else {
-                    val a = ShortArray(readed + 1)
-                    a.forEachIndexed { i, byte -> a[i] = buffer[i] }
-                    a
+                    buffer.copyOfRange(0, readed + 1)
                 }
                 subscriber.onNext(array)
             }
