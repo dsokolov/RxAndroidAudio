@@ -1,13 +1,17 @@
-package me.ilich.rxandroidaudio
+package me.ilich.rxandroidaudio.example
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import me.ilich.rxandroidaudio.AudioOptions
+import me.ilich.rxandroidaudio.RecordObservable
+import me.ilich.rxandroidaudio.InputStreamObservable
+import me.ilich.rxandroidaudio.OutputStreamSubscriber
+import me.ilich.rxandroidaudio.PlaybackSubscriber
 import rx.Observable
 import rx.Subscription
 import rx.schedulers.Schedulers
 import java.io.FileInputStream
 import java.io.FileOutputStream
-
 
 class MainActivity : AppCompatActivity() {
 
@@ -16,7 +20,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         val playbackAudioOptions = AudioOptions.PCM_16BIT_44100_MONO_PLAYBACK
         val recordAudioOptions = AudioOptions.PCM_16BIT_44100_MONO_RECORD
         val fileName = "/mnt/sdcard/temp.pcm"
@@ -24,7 +27,6 @@ class MainActivity : AppCompatActivity() {
         findViewById(R.id.record_start).setOnClickListener {
             subs?.unsubscribe()
             val source = RecordObservable.create<ShortArray>(recordAudioOptions)
-            //val source = ToneObservable.create<ShortArray>(440.0, recordAudioOptions)
             val destination = OutputStreamSubscriber.create<ShortArray>(FileOutputStream(fileName), recordAudioOptions)
             subs = Observable.
                     create(source).

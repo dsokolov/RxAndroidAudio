@@ -2,6 +2,7 @@ package me.ilich.rxandroidaudio
 
 import android.media.AudioFormat
 import android.util.Log
+import me.ilich.rxaa.AudioOptions
 import rx.Observable
 import rx.Subscriber
 import java.io.BufferedInputStream
