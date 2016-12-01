@@ -14,7 +14,7 @@ sealed class OutputStreamSubscriber<T>(
 
     companion object {
 
-        @JvmStatic fun <T> create(outputStream: OutputStream, audioOptions: AudioOptions, bufferSize: Int = audioOptions.recordBufferSize()): OutputStreamSubscriber<T> {
+        @JvmStatic fun <T> create(outputStream: OutputStream, audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize()): OutputStreamSubscriber<T> {
             val result = when (audioOptions.encoding) {
                 AudioFormat.ENCODING_PCM_8BIT -> OutputStream8bitSubscriber(outputStream, audioOptions, bufferSize)
                 AudioFormat.ENCODING_PCM_16BIT -> OutputStream16bitSubscriber(outputStream, audioOptions, bufferSize)

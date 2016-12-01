@@ -1,19 +1,18 @@
 package me.ilich.rxandroidaudio
 
 import android.media.AudioFormat
-import android.media.AudioManager
 import android.media.AudioRecord
 import android.media.AudioTrack
 import rx.Subscriber
 
 sealed class PlaybackSubscriber<T>(
-        audioOptions: AudioOptions,
-        bufferSize: Int
+        var audioOptions: AudioOptions,
+        var bufferSize: Int
 ) : Subscriber<T>() {
 
     companion object {
 
-        @JvmStatic fun <T> create(audioOptions: AudioOptions, bufferSize: Int = audioOptions.playbackBufferSize()): PlaybackSubscriber<T> {
+        @JvmStatic fun <T> create(audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize()): PlaybackSubscriber<T> {
             val result = when (audioOptions.encoding) {
                 AudioFormat.ENCODING_PCM_8BIT -> Playback8BitSubscriber(audioOptions, bufferSize)
                 AudioFormat.ENCODING_PCM_16BIT -> Playback16BitSubscriber(audioOptions, bufferSize)
@@ -24,10 +23,14 @@ sealed class PlaybackSubscriber<T>(
 
     }
 
-    protected val audioTrack = AudioTrack(AudioManager.STREAM_MUSIC, audioOptions.sampleRate,
-            audioOptions.channels, audioOptions.encoding, bufferSize, AudioTrack.MODE_STREAM)
+    protected lateinit var audioTrack: AudioTrack
 
     override fun onStart() {
+        audioTrack = AudioTrack(android.media.AudioManager.STREAM_MUSIC, audioOptions.sampleRate,
+                audioOptions.channels, audioOptions.encoding, bufferSize, AudioTrack.MODE_STREAM)
+        if (audioTrack.state != AudioTrack.STATE_INITIALIZED) {
+            throw RuntimeException("STATE_INITIALIZED")
+        }
         audioTrack.play()
     }
 

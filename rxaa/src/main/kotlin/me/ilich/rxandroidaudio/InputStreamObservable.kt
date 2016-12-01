@@ -1,8 +1,6 @@
 package me.ilich.rxandroidaudio
 
 import android.media.AudioFormat
-import android.util.Log
-import me.ilich.rxaa.AudioOptions
 import rx.Observable
 import rx.Subscriber
 import java.io.BufferedInputStream
@@ -17,7 +15,7 @@ sealed class InputStreamObservable<T>(
 
     companion object {
 
-        @JvmStatic fun <T> create(inputStream: InputStream, audioOptions: AudioOptions, bufferSize: Int = audioOptions.playbackBufferSize()): InputStreamObservable<T> {
+        @JvmStatic fun <T> create(inputStream: InputStream, audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize()): InputStreamObservable<T> {
             val result = when (audioOptions.encoding) {
                 AudioFormat.ENCODING_PCM_8BIT -> InputStream8bitObservable(inputStream, bufferSize)
                 AudioFormat.ENCODING_PCM_16BIT -> InputStream16bitObservable(inputStream, bufferSize)
@@ -34,7 +32,6 @@ sealed class InputStreamObservable<T>(
             val buffer = onCreateBuffer()
             while (!subscriber.isUnsubscribed) {
                 val readed = onRead(buffer, dataInputStream, subscriber)
-                Log.v("Sokolov", "readed $readed")
                 if (readed == -1) {
                     break
                 }

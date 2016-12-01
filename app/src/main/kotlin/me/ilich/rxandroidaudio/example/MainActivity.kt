@@ -2,11 +2,7 @@ package me.ilich.rxandroidaudio.example
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import me.ilich.rxandroidaudio.AudioOptions
-import me.ilich.rxandroidaudio.RecordObservable
-import me.ilich.rxandroidaudio.InputStreamObservable
-import me.ilich.rxandroidaudio.OutputStreamSubscriber
-import me.ilich.rxandroidaudio.PlaybackSubscriber
+import me.ilich.rxandroidaudio.*
 import rx.Observable
 import rx.Subscription
 import rx.schedulers.Schedulers

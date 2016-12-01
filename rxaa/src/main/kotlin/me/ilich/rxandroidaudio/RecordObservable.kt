@@ -13,7 +13,7 @@ sealed class RecordObservable<T>(
 
     companion object {
 
-        @JvmStatic fun <T> create(audioOptions: AudioOptions, bufferSize: Int = audioOptions.recordBufferSize()): RecordObservable<T> {
+        @JvmStatic fun <T> create(audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize()): RecordObservable<T> {
             val result = when (audioOptions.encoding) {
                 AudioFormat.ENCODING_PCM_8BIT -> Record8bitObservable(audioOptions, bufferSize)
                 AudioFormat.ENCODING_PCM_16BIT -> Record16bitObservable(audioOptions, bufferSize)
@@ -24,10 +24,22 @@ sealed class RecordObservable<T>(
 
     }
 
-    val audioRecord = AudioRecord(MediaRecorder.AudioSource.DEFAULT, audioOptions.sampleRate,
-            audioOptions.channels, audioOptions.encoding, bufferSize)
-
     override fun call(subscriber: Subscriber<in T>) {
+        try {
+            val audioRecord = AudioRecord(MediaRecorder.AudioSource.DEFAULT, audioOptions.sampleRate,
+                    audioOptions.channels, audioOptions.encoding, bufferSize)
+            val state = audioRecord.state
+            if (state == AudioRecord.STATE_UNINITIALIZED) {
+                subscriber.onError(RuntimeException("STATE_UNINITIALIZED"))
+            } else {
+                process(audioRecord, subscriber)
+            }
+        } catch (e: IllegalArgumentException) {
+            subscriber.onError(e)
+        }
+    }
+
+    private fun process(audioRecord: AudioRecord, subscriber: Subscriber<in T>) {
         try {
             audioRecord.startRecording()
             val buffer = onCreateBuffer()
