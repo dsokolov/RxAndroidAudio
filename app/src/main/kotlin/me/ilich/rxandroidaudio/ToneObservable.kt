@@ -1,6 +1,7 @@
 package me.ilich.rxandroidaudio
 
 import android.media.AudioFormat
+import android.util.Log
 import rx.Observable
 import rx.Subscriber
 
@@ -12,6 +13,8 @@ sealed class ToneObservable<T>(
 
     companion object {
 
+        private const val TwoPi = 2 * Math.PI
+
         @JvmStatic fun <T> create(frequency: Double, audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize()): ToneObservable<T> {
             val result = when (audioOptions.encoding) {
                 AudioFormat.ENCODING_PCM_8BIT -> Tone8bitObservable(frequency, audioOptions, bufferSize)
@@ -22,6 +25,9 @@ sealed class ToneObservable<T>(
         }
 
     }
+
+    private val freqPerSr = frequency / audioOptions.sampleRate
+    private val phChange = TwoPi * freqPerSr
 
     override fun call(subscriber: Subscriber<in T>) {
         val samples = onCreateSamples()
@@ -36,7 +42,7 @@ sealed class ToneObservable<T>(
             if (s < 0.0) {
                 onPutMinSample(samples, i)
             }
-            ph += 2 * Math.PI * frequency / audioOptions.sampleRate
+            ph += phChange
         }
         while (!subscriber.isUnsubscribed) {
             onNext(subscriber, samples)
@@ -86,6 +92,7 @@ sealed class ToneObservable<T>(
         }
 
         override fun onNext(subscriber: Subscriber<in ShortArray>, data: ShortArray) {
+            Log.v("Sokolov", "tone ${data.size}")
             subscriber.onNext(data)
         }
 

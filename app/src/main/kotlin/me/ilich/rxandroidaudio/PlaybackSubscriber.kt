@@ -2,7 +2,9 @@ package me.ilich.rxandroidaudio
 
 import android.media.AudioFormat
 import android.media.AudioManager
+import android.media.AudioRecord
 import android.media.AudioTrack
+import android.util.Log
 import rx.Subscriber
 
 sealed class PlaybackSubscriber<T>(
@@ -35,25 +37,37 @@ sealed class PlaybackSubscriber<T>(
         audioTrack.release()
     }
 
+    override fun onNext(data: T) {
+        val w = onPlay(data)
+        when (w) {
+            AudioRecord.ERROR_INVALID_OPERATION -> throw RuntimeException("A")
+            AudioRecord.ERROR_BAD_VALUE -> throw RuntimeException("B")
+            AudioRecord.ERROR_DEAD_OBJECT -> throw RuntimeException("C")
+            AudioRecord.ERROR -> throw RuntimeException("D")
+            else -> request(1)
+        }
+    }
+
     override fun onError(e: Throwable) {
         audioTrack.stop()
         audioTrack.release()
     }
 
+    protected abstract fun onPlay(data: T): Int
+
     private class Playback8BitSubscriber(audioOptions: AudioOptions, bufferSize: Int) :
             PlaybackSubscriber<ByteArray>(audioOptions, bufferSize) {
 
-        override fun onNext(data: ByteArray) {
-            audioTrack.write(data, 0, data.size)
-        }
+        override fun onPlay(data: ByteArray) = audioTrack.write(data, 0, data.size)
 
     }
 
     private class Playback16BitSubscriber(audioOptions: AudioOptions, bufferSize: Int) :
             PlaybackSubscriber<ShortArray>(audioOptions, bufferSize) {
 
-        override fun onNext(data: ShortArray) {
-            audioTrack.write(data, 0, data.size)
+        override fun onPlay(data: ShortArray): Int {
+            Log.v("Sokolov", "play ${data.size}")
+            return audioTrack.write(data, 0, data.size)
         }
 
     }
