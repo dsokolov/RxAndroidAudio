@@ -8,6 +8,14 @@ android:
     - android-25
     - extra-android-m2repository
     - sys-img-armeabi-v7a-android-18
+  licenses:
+    - 'android-sdk-preview-license-52d11cd2'
+    - 'android-sdk-license-.+'
+    - 'google-gdk-license-.+'
 
 jdk:
   - oraclejdk8
+
+cache:
+  directories:
+    - $HOME/.gradle
