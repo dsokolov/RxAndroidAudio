@@ -1,3 +1,3 @@
-[![Build Status](https://travis-ci.org/dsokolov/RxAndroidAudio.svg?branch=master)](https://travis-ci.org/dsokolov/RxAndroidAudio)
+[![](https://jitpack.io/v/dsokolov/RxAndroidAudio.svg)](https://jitpack.io/#dsokolov/RxAndroidAudio)
 
 # RxAndroidAudio
