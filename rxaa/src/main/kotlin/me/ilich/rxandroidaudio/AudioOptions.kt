@@ -4,6 +4,9 @@ import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.AudioTrack
 
+/**
+ * Test javadoc
+ */
 class AudioOptions(
         val mode: Mode,
         val encoding: Int,
