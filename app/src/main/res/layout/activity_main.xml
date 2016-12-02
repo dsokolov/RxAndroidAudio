@@ -9,7 +9,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="me.ilich.rxandroidaudio.MainActivity">
+    tools:context="me.ilich.rxandroidaudio.example.MainActivity">
 
     <Button
         android:id="@+id/record_start"
@@ -18,21 +18,27 @@
         android:text="start record" />
 
     <Button
-        android:id="@+id/record_stop"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="stop record" />
-
-    <Button
         android:id="@+id/playback_start"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="start playback" />
 
+    <ProgressBar
+        android:id="@+id/audio_level_measure"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
     <Button
-        android:id="@+id/playback_stop"
+        android:id="@+id/rms_start"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="stop playback" />
+        android:text="start level measure" />
+
+    <Button
+        android:id="@+id/stop"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="stop" />
 
 </LinearLayout>
