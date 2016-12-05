@@ -1,9 +1,13 @@
 package me.ilich.rxandroidaudio.example
 
+import android.Manifest
+import android.media.AudioFormat
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.widget.Button
 import android.widget.ProgressBar
+import com.tbruyelle.rxpermissions.RxPermissions
 import me.ilich.rxandroidaudio.*
 import rx.Observable
 import rx.Subscription
@@ -13,27 +17,49 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.concurrent.TimeUnit
 
+
 class MainActivity : AppCompatActivity() {
 
+    var permisionSubs: Subscription? = null
     var subs: Subscription? = null
 
     lateinit var audioLevel: ProgressBar
+    lateinit var startRecordButton: Button
+    lateinit var startPlaybackButton: Button
+    lateinit var startPlaybackLowpassButton: Button
+    lateinit var startLevelButton: Button
+    lateinit var stopButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         audioLevel = findViewById(R.id.audio_level_measure) as ProgressBar
         audioLevel.max = Short.MAX_VALUE.toInt()
+        startRecordButton = findViewById(R.id.record_start) as Button
+        startPlaybackButton = findViewById(R.id.playback_start) as Button
+        startPlaybackLowpassButton = findViewById(R.id.playback_lowpass_start) as Button
+        startLevelButton = findViewById(R.id.rms_start) as Button
+        stopButton = findViewById(R.id.stop) as Button
 
-        val playbackAudioOptions = AudioOptions.PCM_16BIT_44100_MONO_PLAYBACK
-        val recordAudioOptions = AudioOptions.PCM_16BIT_44100_MONO_RECORD
+        val playbackAudioOptions = AudioOptions.PCM_44100_MONO_PLAYBACK
+        val recordAudioOptions = AudioOptions.PCM_44100_MONO_RECORD
         val fileName = "/mnt/sdcard/temp.pcm"
 
+        permisionSubs = RxPermissions(this).
+                request(Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE).
+                subscribe { granted ->
+                    startRecordButton.isEnabled = granted
+                    startPlaybackButton.isEnabled = granted
+                    startPlaybackLowpassButton.isEnabled = granted
+                    startLevelButton.isEnabled = granted
+                    stopButton.isEnabled = granted
+                }
 
-        findViewById(R.id.record_start).setOnClickListener {
+
+        startRecordButton.setOnClickListener {
             subs?.unsubscribe()
-            val source = RecordObservable.create<ShortArray>(recordAudioOptions)
-            val destination = OutputStreamSubscriber.create<ShortArray>(FileOutputStream(fileName), recordAudioOptions)
+            val source = RecordObservable.create16bit(recordAudioOptions)
+            val destination = OutputStreamSubscriber.create16bit(FileOutputStream(fileName), recordAudioOptions)
             subs = Observable.
                     create(source).
                     onBackpressureDrop().
@@ -41,20 +67,32 @@ class MainActivity : AppCompatActivity() {
                     subscribe(destination)
         }
 
-        findViewById(R.id.playback_start).setOnClickListener {
+        startPlaybackButton.setOnClickListener {
             subs?.unsubscribe()
-            val source = InputStreamObservable.create<ShortArray>(FileInputStream("/mnt/sdcard/temp.pcm"), playbackAudioOptions)
-            val destination = PlaybackSubscriber.create<ShortArray>(playbackAudioOptions)
+            val source = InputStreamObservable.create16bit(FileInputStream("/mnt/sdcard/temp.pcm"), playbackAudioOptions)
+            val destination = PlaybackSubscriber.create16Bit(playbackAudioOptions)
             subs = Observable.
                     create(source).
                     onBackpressureDrop().
-
                     subscribeOn(Schedulers.newThread()).
                     subscribe(destination)
         }
 
-        findViewById(R.id.rms_start).setOnClickListener {
-            val source = RecordObservable.create<ShortArray>(recordAudioOptions)
+        startPlaybackLowpassButton.setOnClickListener {
+            subs?.unsubscribe()
+            val lowpassFilter = LowpassFilter(playbackAudioOptions.bufferSize(AudioFormat.ENCODING_PCM_16BIT), playbackAudioOptions.sampleRate, 2000f, 1f)
+            val source = InputStreamObservable.create16bit(FileInputStream("/mnt/sdcard/temp.pcm"), playbackAudioOptions)
+            val destination = PlaybackSubscriber.create16Bit(playbackAudioOptions)
+            subs = Observable.
+                    create(source).
+                    onBackpressureDrop().
+                    map { data -> lowpassFilter.filter(data) }.
+                    subscribeOn(Schedulers.newThread()).
+                    subscribe(destination)
+        }
+
+        startLevelButton.setOnClickListener {
+            val source = RecordObservable.create16bit(recordAudioOptions)
             subs = Observable.
                     create(source).
                     sample(500L, TimeUnit.MILLISECONDS).
@@ -69,7 +107,7 @@ class MainActivity : AppCompatActivity() {
                     }
         }
 
-        findViewById(R.id.stop).setOnClickListener {
+        stopButton.setOnClickListener {
             subs?.unsubscribe()
         }
 

@@ -1,7 +1,6 @@
 package me.ilich.rxandroidaudio
 
 import android.media.AudioFormat
-import android.media.AudioRecord
 import rx.Observable
 import rx.Subscriber
 
@@ -15,14 +14,11 @@ sealed class ToneObservable<T>(
 
         private const val TwoPi = 2 * Math.PI
 
-        @JvmStatic fun <T> create(frequency: Double, audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize()): ToneObservable<T> {
-            val result = when (audioOptions.encoding) {
-                AudioFormat.ENCODING_PCM_8BIT -> Tone8bitObservable(frequency, audioOptions, bufferSize)
-                AudioFormat.ENCODING_PCM_16BIT -> Tone16bitObservable(frequency, audioOptions, bufferSize)
-                else -> throw IllegalArgumentException("Unknown encoding ${audioOptions.encoding}")
-            }
-            return result as ToneObservable<T>
-        }
+        @JvmStatic fun <T> create8bit(frequency: Double, audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize(AudioFormat.ENCODING_PCM_8BIT)): ToneObservable<ByteArray> =
+                Tone8bitObservable(frequency, audioOptions, bufferSize)
+
+        @JvmStatic fun <T> create816it(frequency: Double, audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize(AudioFormat.ENCODING_PCM_16BIT)): ToneObservable<ShortArray> =
+                Tone16bitObservable(frequency, audioOptions, bufferSize)
 
     }
 

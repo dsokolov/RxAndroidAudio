@@ -12,27 +12,27 @@ sealed class PlaybackSubscriber<T>(
 
     companion object {
 
-        @JvmStatic fun <T> create(audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize()): PlaybackSubscriber<T> {
-            val result = when (audioOptions.encoding) {
-                AudioFormat.ENCODING_PCM_8BIT -> Playback8BitSubscriber(audioOptions, bufferSize)
-                AudioFormat.ENCODING_PCM_16BIT -> Playback16BitSubscriber(audioOptions, bufferSize)
-                else -> throw IllegalArgumentException("Unknown encoding ${audioOptions.encoding}")
-            }
-            return result as PlaybackSubscriber<T>
-        }
+        @JvmStatic fun create8Bit(audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize(AudioFormat.ENCODING_PCM_8BIT)): PlaybackSubscriber<ByteArray> =
+                Playback8BitSubscriber(audioOptions, bufferSize)
+
+        @JvmStatic fun create16Bit(audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize(AudioFormat.ENCODING_PCM_16BIT)): PlaybackSubscriber<ShortArray> =
+                Playback16BitSubscriber(audioOptions, bufferSize)
 
     }
 
     protected lateinit var audioTrack: AudioTrack
 
     override fun onStart() {
+        val encoding = onEncoding()
         audioTrack = AudioTrack(android.media.AudioManager.STREAM_MUSIC, audioOptions.sampleRate,
-                audioOptions.channels, audioOptions.encoding, bufferSize, AudioTrack.MODE_STREAM)
+                audioOptions.channels, encoding, bufferSize, AudioTrack.MODE_STREAM)
         if (audioTrack.state != AudioTrack.STATE_INITIALIZED) {
             throw RuntimeException("STATE_INITIALIZED")
         }
         audioTrack.play()
     }
+
+    protected abstract fun onEncoding(): Int
 
     override fun onNext(data: T) {
         val w = onPlay(data)
@@ -60,12 +60,16 @@ sealed class PlaybackSubscriber<T>(
     private class Playback8BitSubscriber(audioOptions: AudioOptions, bufferSize: Int) :
             PlaybackSubscriber<ByteArray>(audioOptions, bufferSize) {
 
+        override fun onEncoding(): Int = AudioFormat.ENCODING_PCM_8BIT
+
         override fun onPlay(data: ByteArray) = audioTrack.write(data, 0, data.size)
 
     }
 
     private class Playback16BitSubscriber(audioOptions: AudioOptions, bufferSize: Int) :
             PlaybackSubscriber<ShortArray>(audioOptions, bufferSize) {
+
+        override fun onEncoding(): Int = AudioFormat.ENCODING_PCM_16BIT
 
         override fun onPlay(data: ShortArray): Int = audioTrack.write(data, 0, data.size)
 

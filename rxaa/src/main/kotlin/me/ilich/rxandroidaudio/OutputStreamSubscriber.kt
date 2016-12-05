@@ -14,14 +14,11 @@ sealed class OutputStreamSubscriber<T>(
 
     companion object {
 
-        @JvmStatic fun <T> create(outputStream: OutputStream, audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize()): OutputStreamSubscriber<T> {
-            val result = when (audioOptions.encoding) {
-                AudioFormat.ENCODING_PCM_8BIT -> OutputStream8bitSubscriber(outputStream, audioOptions, bufferSize)
-                AudioFormat.ENCODING_PCM_16BIT -> OutputStream16bitSubscriber(outputStream, audioOptions, bufferSize)
-                else -> throw IllegalArgumentException("Unknown encoding ${audioOptions.encoding}")
-            }
-            return result as OutputStreamSubscriber<T>
-        }
+        @JvmStatic fun create8bit(outputStream: OutputStream, audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize(AudioFormat.ENCODING_PCM_8BIT)): OutputStreamSubscriber<ByteArray> =
+                OutputStream8bitSubscriber(outputStream, audioOptions, bufferSize)
+
+        @JvmStatic fun create16bit(outputStream: OutputStream, audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize(AudioFormat.ENCODING_PCM_16BIT)): OutputStreamSubscriber<ShortArray> =
+                OutputStream16bitSubscriber(outputStream, audioOptions, bufferSize)
 
     }
 

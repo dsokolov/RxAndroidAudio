@@ -13,21 +13,19 @@ sealed class RecordObservable<T>(
 
     companion object {
 
-        @JvmStatic fun <T> create(audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize()): RecordObservable<T> {
-            val result = when (audioOptions.encoding) {
-                AudioFormat.ENCODING_PCM_8BIT -> Record8bitObservable(audioOptions, bufferSize)
-                AudioFormat.ENCODING_PCM_16BIT -> Record16bitObservable(audioOptions, bufferSize)
-                else -> throw IllegalArgumentException("Unknown encoding ${audioOptions.encoding}")
-            }
-            return result as RecordObservable<T>
-        }
+        @JvmStatic fun create8bit(audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize(AudioFormat.ENCODING_PCM_8BIT)): RecordObservable<ByteArray> =
+                Record8bitObservable(audioOptions, bufferSize)
+
+        @JvmStatic fun create16bit(audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize(AudioFormat.ENCODING_PCM_16BIT)): RecordObservable<ShortArray> =
+                Record16bitObservable(audioOptions, bufferSize)
 
     }
 
     override fun call(subscriber: Subscriber<in T>) {
         try {
+            val encoding = onEncoding()
             val audioRecord = AudioRecord(MediaRecorder.AudioSource.DEFAULT, audioOptions.sampleRate,
-                    audioOptions.channels, audioOptions.encoding, bufferSize)
+                    audioOptions.channels, encoding, bufferSize)
             val state = audioRecord.state
             if (state == AudioRecord.STATE_UNINITIALIZED) {
                 subscriber.onError(RuntimeException("STATE_UNINITIALIZED"))
@@ -38,6 +36,8 @@ sealed class RecordObservable<T>(
             subscriber.onError(e)
         }
     }
+
+    protected abstract fun onEncoding(): Int
 
     private fun process(audioRecord: AudioRecord, subscriber: Subscriber<in T>) {
         try {
@@ -68,6 +68,8 @@ sealed class RecordObservable<T>(
     private class Record8bitObservable(audioOptions: AudioOptions, bufferSize: Int) :
             RecordObservable<ByteArray>(audioOptions, bufferSize) {
 
+        override fun onEncoding(): Int = AudioFormat.ENCODING_PCM_8BIT
+
         override fun onCreateBuffer() = ByteArray(bufferSize)
 
         override fun onReadData(buffer: ByteArray, subscriber: Subscriber<in ByteArray>, audioRecord: AudioRecord): Int {
@@ -87,6 +89,8 @@ sealed class RecordObservable<T>(
 
     private class Record16bitObservable(audioOptions: AudioOptions, bufferSize: Int) :
             RecordObservable<ShortArray>(audioOptions, bufferSize) {
+
+        override fun onEncoding(): Int = AudioFormat.ENCODING_PCM_16BIT
 
         override fun onCreateBuffer() = ShortArray(bufferSize)
 

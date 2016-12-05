@@ -9,18 +9,15 @@ import android.media.AudioTrack
  */
 class AudioOptions(
         val mode: Mode,
-        val encoding: Int,
         val sampleRate: Int,
         val channels: Int
 ) {
 
     companion object {
 
-        val PCM_8BIT_44100_MONO_PLAYBACK = AudioOptions(Mode.PLAYBACK, AudioFormat.ENCODING_PCM_8BIT, 44100, AudioFormat.CHANNEL_OUT_MONO)
-        val PCM_16BIT_44100_MONO_PLAYBACK = AudioOptions(Mode.PLAYBACK, AudioFormat.ENCODING_PCM_16BIT, 44100, AudioFormat.CHANNEL_OUT_MONO)
+        val PCM_44100_MONO_PLAYBACK = AudioOptions(Mode.PLAYBACK, 44100, AudioFormat.CHANNEL_OUT_MONO)
 
-        val PCM_8BIT_44100_MONO_RECORD = AudioOptions(Mode.RECORD, AudioFormat.ENCODING_PCM_8BIT, 44100, AudioFormat.CHANNEL_IN_MONO)
-        val PCM_16BIT_44100_MONO_RECORD = AudioOptions(Mode.RECORD, AudioFormat.ENCODING_PCM_16BIT, 44100, AudioFormat.CHANNEL_IN_MONO)
+        val PCM_44100_MONO_RECORD = AudioOptions(Mode.RECORD, 44100, AudioFormat.CHANNEL_IN_MONO)
     }
 
     enum class Mode {
@@ -28,7 +25,7 @@ class AudioOptions(
         RECORD
     }
 
-    fun bufferSize(): Int = when (mode) {
+    fun bufferSize(encoding: Int): Int = when (mode) {
         Mode.PLAYBACK -> AudioTrack.getMinBufferSize(sampleRate, channels, encoding)
         Mode.RECORD -> AudioRecord.getMinBufferSize(sampleRate, channels, encoding)
     }

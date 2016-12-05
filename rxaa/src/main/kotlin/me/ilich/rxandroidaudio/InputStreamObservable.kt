@@ -15,14 +15,11 @@ sealed class InputStreamObservable<T>(
 
     companion object {
 
-        @JvmStatic fun <T> create(inputStream: InputStream, audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize()): InputStreamObservable<T> {
-            val result = when (audioOptions.encoding) {
-                AudioFormat.ENCODING_PCM_8BIT -> InputStream8bitObservable(inputStream, bufferSize)
-                AudioFormat.ENCODING_PCM_16BIT -> InputStream16bitObservable(inputStream, bufferSize)
-                else -> throw IllegalArgumentException("Unknown encoding ${audioOptions.encoding}")
-            }
-            return result as InputStreamObservable<T>
-        }
+        @JvmStatic fun create8bit(inputStream: InputStream, audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize(AudioFormat.ENCODING_PCM_8BIT)): InputStreamObservable<ByteArray> =
+                InputStream8bitObservable(inputStream, bufferSize)
+
+        @JvmStatic fun create16bit(inputStream: InputStream, audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize(AudioFormat.ENCODING_PCM_16BIT)): InputStreamObservable<ShortArray> =
+                InputStream16bitObservable(inputStream, bufferSize)
 
     }
 

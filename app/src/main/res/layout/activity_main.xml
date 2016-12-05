@@ -23,6 +23,12 @@
         android:layout_height="wrap_content"
         android:text="start playback" />
 
+    <Button
+        android:id="@+id/playback_lowpass_start"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="start lowpass playback" />
+
     <ProgressBar
         android:id="@+id/audio_level_measure"
         style="?android:attr/progressBarStyleHorizontal"
