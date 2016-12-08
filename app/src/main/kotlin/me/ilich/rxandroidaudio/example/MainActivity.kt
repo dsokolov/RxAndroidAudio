@@ -1,7 +1,6 @@
 package me.ilich.rxandroidaudio.example
 
 import android.Manifest
-import android.media.AudioFormat
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
@@ -34,7 +33,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         audioLevel = findViewById(R.id.audio_level_measure) as ProgressBar
-        audioLevel.max = Short.MAX_VALUE.toInt()
+        audioLevel.max = 200
         startRecordButton = findViewById(R.id.record_start) as Button
         startPlaybackButton = findViewById(R.id.playback_start) as Button
         startPlaybackLowpassButton = findViewById(R.id.playback_lowpass_start) as Button
@@ -80,7 +79,7 @@ class MainActivity : AppCompatActivity() {
 
         startPlaybackLowpassButton.setOnClickListener {
             subs?.unsubscribe()
-            val lowpassFilter = LowpassFilter(playbackAudioOptions.bufferSize(AudioFormat.ENCODING_PCM_16BIT), playbackAudioOptions.sampleRate, 2000f, 1f)
+            val lowpassFilter = LowpassFilter.crate16bit(2000f, 1f, playbackAudioOptions)
             val source = InputStreamObservable.create16bit(FileInputStream("/mnt/sdcard/temp.pcm"), playbackAudioOptions)
             val destination = PlaybackSubscriber.create16Bit(playbackAudioOptions)
             subs = Observable.
@@ -96,14 +95,15 @@ class MainActivity : AppCompatActivity() {
             subs = Observable.
                     create(source).
                     sample(500L, TimeUnit.MILLISECONDS).
-                    map {
-                        AudioLevel.db(it)
+                    map { samples ->
+                        AudioLevel.maxDecibel(samples)
                     }.
+                    map { peek -> peek + 110.0 }.
                     subscribeOn(Schedulers.newThread()).
                     observeOn(AndroidSchedulers.mainThread()).
-                    subscribe { rms ->
-                        Log.v("Sokolov", "$rms")
-                        audioLevel.progress = rms.toInt()
+                    subscribe {
+                        Log.v("Sokolov", "$it")
+                        audioLevel.progress = it.toInt()
                     }
         }
 

@@ -15,10 +15,16 @@ sealed class InputStreamObservable<T>(
 
     companion object {
 
-        @JvmStatic fun create8bit(inputStream: InputStream, audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize(AudioFormat.ENCODING_PCM_8BIT)): InputStreamObservable<ByteArray> =
+        @Suppress("unused") @JvmStatic fun create8bit(
+                inputStream: InputStream, audioOptions: AudioOptions,
+                bufferSize: Int = audioOptions.bufferSize(AudioFormat.ENCODING_PCM_8BIT)
+        ): InputStreamObservable<ByteArray> =
                 InputStream8bitObservable(inputStream, bufferSize)
 
-        @JvmStatic fun create16bit(inputStream: InputStream, audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize(AudioFormat.ENCODING_PCM_16BIT)): InputStreamObservable<ShortArray> =
+        @Suppress("unused") @JvmStatic fun create16bit(
+                inputStream: InputStream, audioOptions: AudioOptions,
+                bufferSize: Int = audioOptions.bufferSize(AudioFormat.ENCODING_PCM_16BIT)
+        ): InputStreamObservable<ShortArray> =
                 InputStream16bitObservable(inputStream, bufferSize)
 
     }

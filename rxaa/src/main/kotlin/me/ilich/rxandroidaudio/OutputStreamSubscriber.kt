@@ -9,15 +9,21 @@ import java.io.OutputStream
 sealed class OutputStreamSubscriber<T>(
         private val outputStream: OutputStream,
         val audioOptions: AudioOptions,
-        val bufferSize: Int
+        bufferSize: Int
 ) : Subscriber<T>() {
 
     companion object {
 
-        @JvmStatic fun create8bit(outputStream: OutputStream, audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize(AudioFormat.ENCODING_PCM_8BIT)): OutputStreamSubscriber<ByteArray> =
+        @Suppress("unused") @JvmStatic fun create8bit(
+                outputStream: OutputStream, audioOptions: AudioOptions,
+                bufferSize: Int = audioOptions.bufferSize(AudioFormat.ENCODING_PCM_8BIT)
+        ): OutputStreamSubscriber<ByteArray> =
                 OutputStream8bitSubscriber(outputStream, audioOptions, bufferSize)
 
-        @JvmStatic fun create16bit(outputStream: OutputStream, audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize(AudioFormat.ENCODING_PCM_16BIT)): OutputStreamSubscriber<ShortArray> =
+        @Suppress("unused") @JvmStatic fun create16bit(
+                outputStream: OutputStream, audioOptions: AudioOptions,
+                bufferSize: Int = audioOptions.bufferSize(AudioFormat.ENCODING_PCM_16BIT)
+        ): OutputStreamSubscriber<ShortArray> =
                 OutputStream16bitSubscriber(outputStream, audioOptions, bufferSize)
 
     }

@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("me.ilich.rxaa.test", appContext.getPackageName());
+        assertEquals("me.ilich.rxandroidaudio.test", appContext.getPackageName());
     }
 }

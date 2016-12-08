@@ -13,10 +13,16 @@ sealed class RecordObservable<T>(
 
     companion object {
 
-        @JvmStatic fun create8bit(audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize(AudioFormat.ENCODING_PCM_8BIT)): RecordObservable<ByteArray> =
+        @Suppress("unused") @JvmStatic fun create8bit(
+                audioOptions: AudioOptions,
+                bufferSize: Int = audioOptions.bufferSize(AudioFormat.ENCODING_PCM_8BIT)
+        ): RecordObservable<ByteArray> =
                 Record8bitObservable(audioOptions, bufferSize)
 
-        @JvmStatic fun create16bit(audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize(AudioFormat.ENCODING_PCM_16BIT)): RecordObservable<ShortArray> =
+        @Suppress("unused") @JvmStatic fun create16bit(
+                audioOptions: AudioOptions,
+                bufferSize: Int = audioOptions.bufferSize(AudioFormat.ENCODING_PCM_16BIT)
+        ): RecordObservable<ShortArray> =
                 Record16bitObservable(audioOptions, bufferSize)
 
     }

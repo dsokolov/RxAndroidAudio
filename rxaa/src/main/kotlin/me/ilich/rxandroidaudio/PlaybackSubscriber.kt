@@ -12,10 +12,16 @@ sealed class PlaybackSubscriber<T>(
 
     companion object {
 
-        @JvmStatic fun create8Bit(audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize(AudioFormat.ENCODING_PCM_8BIT)): PlaybackSubscriber<ByteArray> =
+        @Suppress("unused") @JvmStatic fun create8Bit(
+                audioOptions: AudioOptions,
+                bufferSize: Int = audioOptions.bufferSize(AudioFormat.ENCODING_PCM_8BIT)
+        ): PlaybackSubscriber<ByteArray> =
                 Playback8BitSubscriber(audioOptions, bufferSize)
 
-        @JvmStatic fun create16Bit(audioOptions: AudioOptions, bufferSize: Int = audioOptions.bufferSize(AudioFormat.ENCODING_PCM_16BIT)): PlaybackSubscriber<ShortArray> =
+        @Suppress("unused") @JvmStatic fun create16Bit(
+                audioOptions: AudioOptions,
+                bufferSize: Int = audioOptions.bufferSize(AudioFormat.ENCODING_PCM_16BIT)
+        ): PlaybackSubscriber<ShortArray> =
                 Playback16BitSubscriber(audioOptions, bufferSize)
 
     }
