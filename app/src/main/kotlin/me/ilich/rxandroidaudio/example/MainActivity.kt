@@ -92,13 +92,15 @@ class MainActivity : AppCompatActivity() {
 
         startLevelButton.setOnClickListener {
             val source = RecordObservable.create16bit(recordAudioOptions)
+            val lowpassFilter = LowpassFilter.crate16bit(32.0F, 1.0F, recordAudioOptions)
             subs = Observable.
                     create(source).
                     sample(500L, TimeUnit.MILLISECONDS).
+                    map { samples -> lowpassFilter.filter(samples) }.
                     map { samples ->
                         AudioLevel.maxDecibel(samples)
                     }.
-                    map { peek -> peek + 110.0 }.
+                    map { peek -> peek + 160.0 }.
                     subscribeOn(Schedulers.newThread()).
                     observeOn(AndroidSchedulers.mainThread()).
                     subscribe {
