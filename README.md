@@ -22,17 +22,7 @@ allprojects {
 And on your application level `build.gradle`:
 
 ```groovy
-compile 'com.github.pavel163:ProbeTools:1.2.0'
-```
-
-If you prefer maven:
-
-```xml
-<dependency>
-	    <groupId>com.github.pavel163</groupId>
-	    <artifactId>ProbeTools</artifactId>
-	    <version>1.2.0</version>
-	</dependency>
+compile 'com.github.dsokolov:RxAndroidAudio:0.6'
 ```
 
 ## Usage
