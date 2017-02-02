@@ -17,16 +17,9 @@ class AudioLevel {
                         map { sh ->
                             sh.toDouble() / Short.MAX_VALUE
                         }.
-                        map { db ->
-                            if (db == 0.0) {
-                                EPSILON
-                            } else {
-                                Math.abs(db)
-                            }
-                        }.
-                        map { db ->
-                            20.0 * Math.log10(db)
-                        }.
+                        filter { it == 0.0 }.
+                        map { Math.abs(it) }.
+                        map { 20.0 * Math.log10(it) }.
                         filter(Double::isFinite).
                         max() ?:
                         Double.NEGATIVE_INFINITY
