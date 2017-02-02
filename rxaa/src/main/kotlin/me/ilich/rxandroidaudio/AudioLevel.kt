@@ -17,7 +17,7 @@ class AudioLevel {
                         map { sh ->
                             sh.toDouble() / Short.MAX_VALUE
                         }.
-                        filter { it == 0.0 }.
+                        filter { it != 0.0 }.
                         map { Math.abs(it) }.
                         map { 20.0 * Math.log10(it) }.
                         filter(Double::isFinite).
